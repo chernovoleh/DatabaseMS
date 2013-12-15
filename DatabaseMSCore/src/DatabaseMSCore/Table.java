@@ -1,10 +1,13 @@
 package DatabaseMSCore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
-public class Table {
+public class Table implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	private TableScheme tableScheme;
 	private ArrayList<Object [] > rows;
 	private String tableName;

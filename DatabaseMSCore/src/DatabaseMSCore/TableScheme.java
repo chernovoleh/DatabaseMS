@@ -1,9 +1,12 @@
 package DatabaseMSCore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class TableScheme {
+public class TableScheme implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	private ArrayList<ColumnScheme<?> > columnSchemes;	
 	
 	public TableScheme() {

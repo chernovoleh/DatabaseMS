@@ -1,9 +1,12 @@
 package DatabaseMSCore;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Database {
+public class Database implements Serializable{
+	private static final long serialVersionUID = 1L;
+	
 	private ArrayList<Table> tables;
 	private String name;
 	
@@ -37,6 +40,7 @@ public class Database {
 	
 	public Database(String name) {
 		this.name = name;
+		tables = new ArrayList<Table>();
 	}
 	
 	public String name() {
@@ -59,8 +63,7 @@ public class Database {
 	public Boolean addTable(TableScheme tableScheme, String tableName) {
 		for(Table t : tables) {
 			if(t.name() == tableName)
-				return false;
-			
+				return false;			
 		}	
 		
 		Table newTable = new Table(tableScheme, tableName);
