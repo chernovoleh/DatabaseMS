@@ -1,0 +1,5 @@
+Link to requirements:
+http://www.unicyb.kiev.ua/~kuzenko/it/ittask13s.htm
+
+Additional types: 4, 5
+Additional operations: 1, 9 
