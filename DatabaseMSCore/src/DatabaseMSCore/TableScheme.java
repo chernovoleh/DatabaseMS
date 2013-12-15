@@ -36,14 +36,19 @@ public class TableScheme {
 	}
 	
 	public Boolean changeColumnName(String oldName, String newName) {
+		if(oldName == newName)
+			return true;
+		
+		int index = columnIndex(oldName);
+		
 		for(ColumnScheme<?> column : columnSchemes) {
-			if(column.getColumnName() == oldName) {
-				column.setColumnName(newName);
-				return true;
+			if(column.getColumnName() == newName) {
+				return false;
 			}
 		}
 		
-		return false;			
+		columnSchemes.get(index).setColumnName(newName);		
+		return true;			
 	}
 	
 	public int columnsCount() {
