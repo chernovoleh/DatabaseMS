@@ -13,8 +13,12 @@ public class Table implements Serializable{
 	private String tableName;
 	
 	private class RowsIterator implements Iterator<Object[]> {
-
+		private ArrayList<Object [] > rows;
 		private int index = 0;
+		
+		public RowsIterator(ArrayList<Object [] > rows) {
+			this.rows = rows;
+		}
 		
 		@Override
 		public boolean hasNext() {
@@ -33,10 +37,14 @@ public class Table implements Serializable{
 		
 	}
 	private class Rows implements Iterable<Object []> {
-
+		private ArrayList<Object[]> rows;
+		
+		public Rows(ArrayList<Object[]> rows) {
+			this.rows = rows;
+		}
 		@Override
 		public Iterator<Object[]> iterator() {			
-			return new RowsIterator();
+			return new RowsIterator(rows);
 		}
 		
 	}
@@ -108,8 +116,23 @@ public class Table implements Serializable{
 	}
 	
 	public Iterable<Object[]> rows() {
-		return new Rows();
+		return new Rows(rows);
 	}
 	
+	public Iterable<Object[]> rows(Map<String, Object> pattern) {
+		ArrayList<Object[]> chosenRows = new ArrayList<Object[]>();
+		for(Object [] row : rows) {
+			Boolean flag = true;
+			for(Map.Entry<String, Object> entry : pattern.entrySet()) {
+				int index = tableScheme.columnIndex(entry.getKey());
+				if(!row[index].equals(entry.getValue()))
+					flag = false;
+			}
+			
+			if(flag)
+				chosenRows.add(row);
+		}
+		return new Rows(chosenRows);
+	}	
 
 }

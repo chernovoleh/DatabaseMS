@@ -15,7 +15,7 @@ public class TableScheme implements Serializable{
 	
 	public <T> Boolean pushBackColumn(ColumnScheme<T> column) {
 		for(ColumnScheme<?> cs : columnSchemes)
-			if(cs.getColumnName() == column.getColumnName())
+			if(cs.getColumnName().equals(column.getColumnName()))
 				return false;
 		
 		columnSchemes.add(column);		
@@ -39,13 +39,13 @@ public class TableScheme implements Serializable{
 	}
 	
 	public Boolean changeColumnName(String oldName, String newName) {
-		if(oldName == newName)
+		if(oldName.equals(newName))
 			return true;
 		
 		int index = columnIndex(oldName);
 		
 		for(ColumnScheme<?> column : columnSchemes) {
-			if(column.getColumnName() == newName) {
+			if(column.getColumnName().equals(newName)) {
 				return false;
 			}
 		}
@@ -60,7 +60,7 @@ public class TableScheme implements Serializable{
 	
 	public int columnIndex(String columnName) {
 		for(int i = 0; i < columnSchemes.size(); ++i) {
-			if(columnSchemes.get(i).getColumnName() == columnName)
+			if(columnSchemes.get(i).getColumnName().equals(columnName))
 				return i;
 		}
 		
