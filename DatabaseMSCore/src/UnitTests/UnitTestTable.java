@@ -50,10 +50,10 @@ public class UnitTestTable {
 		}
 		assertTrue(table.changeColumnName("Name", "NAME"));
 		
-		assertTrue(table.setValue(0, "NAME", "QQQQ"));
-		assertTrue(table.setValue(0, "Age", 20));
-		assertTrue(table.setValue(0, "Weight", 12.));
-		assertFalse(table.setValue(0, "Age", 20.));
+		assertTrue(table.setValue(0, 0, "QQQQ"));
+		assertTrue(table.setValue(0, 1, 20));
+		assertTrue(table.setValue(0, 2, 12.));
+		assertFalse(table.setValue(0, 1, 20.));
 		
 		for(Object [] row : table.rows()) {
 			assertTrue(row[0].equals("QQQQ"));

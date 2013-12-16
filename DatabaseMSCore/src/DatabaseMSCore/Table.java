@@ -84,16 +84,16 @@ public class Table implements Serializable{
 		return true;
 	}
 	
-	public Boolean setValue(int rowIndex, String columnName, Object newValue) {
+	public Boolean setValue(int rowIndex, int columnIndex, Object newValue) {
 		if(rowIndex >= rows.size())
 			throw new IndexOutOfBoundsException();
 		
-		int colIndex = tableScheme.columnIndex(columnName);
+		String columnName = tableScheme.columnName(columnIndex);
 		
 		if(!tableScheme.checkType(columnName, newValue))
 			return false;
 		
-		rows.get(rowIndex)[colIndex] = newValue;	
+		rows.get(rowIndex)[columnIndex] = newValue;	
 		return true;
 	}
 	
@@ -134,5 +134,13 @@ public class Table implements Serializable{
 		}
 		return new Rows(chosenRows);
 	}	
+	
+	public Iterable<String> columnNames() {
+		ArrayList<String> columnNames = new ArrayList<String>();
+		for(int i = 0;i < tableScheme.columnsCount();++i)
+			columnNames.add(tableScheme.columnName(i));
+		
+		return columnNames;
+	}
 
 }

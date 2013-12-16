@@ -15,21 +15,20 @@ public class DatabaseManager {
 	private ArrayList<Database> databases;
 	private Database activeDB;
 	private Table activeTable;
-	private String workspacePath;
+	private File workspaceFolder;
 	
 	public DatabaseManager() {
 		databases = new ArrayList<Database>();
 	}
 	
-	public Boolean loadWorkspace(String path) {
-		File folder = new File(path);
+	public Boolean loadWorkspace(File folder) {
 		if(folder == null || !folder.isDirectory())
 			return false;
 		
 		for (final File fileEntry : folder.listFiles()) {
 			if(!fileEntry.isFile())	
 				continue;
-			if(!fileEntry.toPath().toString().contains(".db")) 
+			if(!fileEntry.toPath().toString().contains(".mydb")) 
 				continue;
 			try {
 				
@@ -43,22 +42,21 @@ public class DatabaseManager {
 			}			
 	    }
 		
-		workspacePath = path;
+		workspaceFolder = folder;
 		activeDB = null;
 		activeTable = null;		
 		return true;
 	}
 	
 	public Boolean saveWorkspace() {
-		if(workspacePath == null)
+		if(workspaceFolder == null)
 			return false;
-		File folder = new File(workspacePath);
-		if(folder == null || !folder.isDirectory())
+		if(!workspaceFolder.isDirectory())
 			return false;
 		
 		for(Database db : databases) {
 			try {
-				FileOutputStream fos = new FileOutputStream(db.name() + ".db");
+				FileOutputStream fos = new FileOutputStream(workspaceFolder.getAbsolutePath() + "\\" + db.name() + ".mydb");
 				ObjectOutputStream oos = new ObjectOutputStream(fos);				
 				oos.writeObject(db);
 				oos.close();

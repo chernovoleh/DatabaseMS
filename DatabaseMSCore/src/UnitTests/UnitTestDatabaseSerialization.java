@@ -26,7 +26,7 @@ public class UnitTestDatabaseSerialization {
 		ts.pushBackColumn(new ColumnScheme<Integer>("Age", Integer.class, 0));
 		ts.pushBackColumn(new ColumnScheme<Double>("Weight", Double.class, 0.));
 		
-		Database db1 = new Database("Db1");
+		Database db1 = new Database("Db2");
 		assertTrue(db1.addTable(ts, "Table1"));
 		assertTrue(db1.addTable(ts, "Table2"));
 		
@@ -56,7 +56,7 @@ public class UnitTestDatabaseSerialization {
 		
 		oin.close();	
 		
-		assertEquals(db2.name(), "Db1");
+		assertEquals(db2.name(), "Db2");
 		assertTrue(db2.tableCount() == 2);
 		for(String tableName : db2.tableNames()) {
 			Table table = db2.table(tableName);
