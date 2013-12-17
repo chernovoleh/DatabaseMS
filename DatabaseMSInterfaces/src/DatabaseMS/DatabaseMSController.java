@@ -1,6 +1,7 @@
 package DatabaseMS;
 
 import java.io.File;
+import java.util.Map;
 
 public interface DatabaseMSController {
 	Boolean OnWorkspaceChosen(File folder);	
@@ -17,4 +18,5 @@ public interface DatabaseMSController {
 	Boolean OnColumnNameChanged(String oldName, String newName);
 	
 	Boolean IsValueValid(String columnName, String value);
+	Boolean OnSearchByPattern(Map<String, String> pattern);
 }

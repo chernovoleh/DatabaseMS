@@ -1,6 +1,7 @@
 package DatabaseMSController;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,6 +57,22 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 			
 			msView.fillTable(rows, columnNames);
 		}
+	}
+	
+	private void fillTable(ArrayList<Integer> indexes) {		
+		Object[][] rows = new Object[indexes.size()][];
+		
+		int i = 0;
+		for(Integer index : indexes) {
+			rows[i++] = dbManager.activeTable().getRow(index);
+		}
+		
+		Object [] columnNames = new Object[dbManager.activeTable().columnsCount()];
+		int j = 0;
+		for(String columnName : dbManager.activeTable().columnNames())
+			columnNames[j++] = columnName;
+		
+		msView.fillTable(rows, columnNames);
 	}
 
 	@Override
@@ -124,6 +141,19 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 	public Boolean IsValueValid(String columnName, String value) {
 		Table activeTable = dbManager.activeTable();
 		return activeTable.checkType(columnName, value);
+	}
+
+	@Override
+	public Boolean OnSearchByPattern(Map<String, String> pattern) {
+		if(pattern.size() == 0)
+			return true;
+		
+		ArrayList<Integer> foundRows = new ArrayList<Integer>();
+		for(Integer i : dbManager.activeTable().rows(pattern))
+			foundRows.add(i);
+		
+		fillTable(foundRows);
+		return null;
 	}
 
 }

@@ -27,6 +27,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.Map;
 
 import javax.swing.JPanel;
 
@@ -81,6 +82,26 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 			}			
 		}
 	};	
+	
+	private ActionListener patternSearchListener =  new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(tableView.getColumnCount() <= 0)
+				return;
+			String [] columnNames = new String[tableView.getColumnCount()];
+			for(int i = 0;i < columnNames.length; ++i)
+				columnNames[i] = tableView.getColumnName(i);
+			DatabaseMSPatternWindow dialog = new DatabaseMSPatternWindow(frmDbmanager, columnNames);
+			dialog.setController(msController);
+			dialog.show(new DatabaseMSPatternWindow.PatternCreatedListener() {
+
+				@Override
+				public void patternCreated(Map<String, String> pattern) {
+					msController.OnSearchByPattern(pattern);					
+				}
+				
+			});
+		}
+	};
 	
 	
 	/**
@@ -173,10 +194,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		mnActions.add(mntmRenamecolumn);
 		
 		JMenuItem mntmSearch = new JMenuItem("Search");
-		mntmSearch.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
+		mntmSearch.addActionListener(patternSearchListener);
 		mnActions.add(mntmSearch);
 		frmDbmanager.getContentPane().setLayout(new GridLayout(0, 1, 0, 0));
 		
