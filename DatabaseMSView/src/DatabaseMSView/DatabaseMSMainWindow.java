@@ -46,7 +46,26 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 	private JFrame frmDbmanager;
 	private DatabaseMSController msController;
 	private JTree dbTree;
-	private JTable table;
+	private DatabaseMSTableView tableView;
+	
+	private ActionListener renameColumnActionListener = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(tableView.getColumnCount() <= 0)
+				return;
+			String [] columnNames = new String[tableView.getColumnCount()];
+			for(int i = 0;i < columnNames.length; ++i)
+				columnNames[i] = tableView.getColumnName(i);
+			DatabaseMSChangeColumnNameWindow dialog = new DatabaseMSChangeColumnNameWindow(frmDbmanager, columnNames);
+			dialog.show(new DatabaseMSChangeColumnNameWindow.ColumnNameChangedListener() {
+
+				@Override
+				public void columnNameChanged(String oldName, String newName) {
+					msController.OnColumnNameChanged(oldName, newName);
+					
+				}
+			});
+		}
+	};	
 	
 	private TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
 		@Override
@@ -59,47 +78,9 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 				msController.OnSetActiveDatabase(selectedNode.toString());
 			} else if(selectedNode.getLevel()== 2) {
 				msController.OnSetActiveTable(selectedNode.toString());
-			}
-			
-			
+			}			
 		}
-	};
-	
-	private ActionListener renameColumnActionListener = new ActionListener() {
-		public void actionPerformed(ActionEvent e) {
-			if(table.getModel().getColumnCount() <= 0)
-				return;
-			String [] columnNames = new String[table.getModel().getColumnCount()];
-			for(int i = 0;i < columnNames.length; ++i)
-				columnNames[i] = table.getModel().getColumnName(i);
-			DatabaseMSChangeColumnNameWindow dialog = new DatabaseMSChangeColumnNameWindow(frmDbmanager, columnNames);
-			dialog.show(new DatabaseMSChangeColumnNameWindow.ColumnNameChangedListener() {
-
-				@Override
-				public void columnNameChanged(String oldName, String newName) {
-					msController.OnColumnNameChanged(oldName, newName);
-					
-				}
-			});
-		}
-	};
-	
-	private TableModelListener tableModelListener = new TableModelListener() {
-
-		@Override
-		public void tableChanged(TableModelEvent e) {
-			int row = e.getFirstRow();
-	        int column = e.getColumn();
-	        if(row < 0 || column < 0)
-	        	return;
-	        
-	        if(e.getType() == TableModelEvent.UPDATE) {
-	        	msController.OnUpdateValue(row, column, table.getModel().getValueAt(row, column));
-	        }   
-			
-		}
-		
-	};
+	};	
 	
 	
 	/**
@@ -111,6 +92,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 	
 	public void setController(DatabaseMSController msController) {
 		this.msController = msController;
+		tableView.setController(msController);
 	}
 
 	/**
@@ -157,8 +139,8 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		JMenuItem mntmAdd = new JMenuItem("Add");
 		mntmAdd.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				if(table.getSelectedRow() >= 0) {
-					int row = table.getSelectedRow();
+				if(tableView.getSelectedRow() >= 0) {
+					int row = tableView.getSelectedRow();
 					msController.OnRowInserted(row);
 				} else if(dbTree.getSelectionCount() >= 0) {
 					
@@ -170,8 +152,8 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		JMenuItem mntmRemove = new JMenuItem("Remove");
 		mntmRemove.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(table.getSelectedRow() >= 0) {
-					int row = table.getSelectedRow();
+				if(tableView.getSelectedRow() >= 0) {
+					int row = tableView.getSelectedRow();
 					msController.OnRowRemoved(row);
 				} else if(dbTree.getSelectionCount() > 0) {
 					TreePath path = dbTree.getSelectionPath();
@@ -210,9 +192,8 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		JScrollPane scrollPane = new JScrollPane();
 		splitPane.setRightComponent(scrollPane);
 		
-		table = new JTable();
-		table.getModel().addTableModelListener(tableModelListener);
-		scrollPane.setViewportView(table);		
+		tableView = new DatabaseMSTableView();		
+		tableView.registrate(scrollPane);		
 	}
 
 	@Override
@@ -235,8 +216,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 
 	@Override
 	public void fillTable(Object[][] rows, Object[] columnNames) {
-		DefaultTableModel model = (DefaultTableModel)table.getModel();
-		model.setDataVector(rows, columnNames);		
+		tableView.fileTable(rows, columnNames);		
 	}
 
 	@Override
