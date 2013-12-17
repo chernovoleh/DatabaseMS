@@ -2,17 +2,15 @@ package DatabaseMSCore;
 
 import java.io.Serializable;
 
-public class ColumnScheme<T> implements Serializable{
+public class ColumnScheme implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private String columnName;
-	private Class<T> type;
-	private T defaultValue;
+	private Class<? extends dbType> type;	
 	
-	public ColumnScheme(String columnName, Class<T> type, T defaultValue) {
+	public ColumnScheme(String columnName, Class<? extends dbType> type) {
 		this.columnName = columnName;
-		this.type = type;
-		this.defaultValue = defaultValue;
+		this.type = type;		
 	}
 	
 	public String getColumnName() {
@@ -23,11 +21,31 @@ public class ColumnScheme<T> implements Serializable{
 		return columnName = newName;
 	}
 	
-	public Class<T> getType() {
-		return type;		
+	public dbType getInstance() {
+		try {
+			return type.newInstance();
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
-	public T getDefaultValue() {
-		return defaultValue;
+	public Boolean canBeInitializedWith(String val) {
+		try {
+			return type.newInstance().canBeInitializedWith(val);
+		} catch (InstantiationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
+	
+	
 }

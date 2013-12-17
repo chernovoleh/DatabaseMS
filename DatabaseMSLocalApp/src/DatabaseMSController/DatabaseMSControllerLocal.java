@@ -77,7 +77,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public Boolean OnUpdateValue(int rowIndex, int columnIndex, Object newValue) {
-		if(!dbManager.activeTable().setValue(rowIndex, columnIndex, newValue))
+		if(!dbManager.activeTable().setValue(rowIndex, columnIndex, newValue.toString()))
 			return false;
 		return null;
 	}
@@ -85,7 +85,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 	@Override
 	public Boolean OnRowInserted(int rowIndex) {
 		Table table = dbManager.activeTable();
-		Map<String, Object> vals = new HashMap<String, Object>();
+		Map<String, String> vals = new HashMap<String, String>();
 		table.addRow(vals);
 		fillTable();
 		return true;

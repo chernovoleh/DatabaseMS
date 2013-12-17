@@ -7,14 +7,14 @@ import java.util.Map;
 public class TableScheme implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
-	private ArrayList<ColumnScheme<?> > columnSchemes;	
+	private ArrayList<ColumnScheme> columnSchemes;	
 	
 	public TableScheme() {
-		columnSchemes = new ArrayList<ColumnScheme<?>>();
+		columnSchemes = new ArrayList<ColumnScheme>();
 	}
 	
-	public <T> Boolean pushBackColumn(ColumnScheme<T> column) {
-		for(ColumnScheme<?> cs : columnSchemes)
+	public <T> Boolean pushBackColumn(ColumnScheme column) {
+		for(ColumnScheme cs : columnSchemes)
 			if(cs.getColumnName().equals(column.getColumnName()))
 				return false;
 		
@@ -22,19 +22,18 @@ public class TableScheme implements Serializable{
 		return true;
 	}
 	
-	public Boolean checkType(String columnName, Object value) {
+	public Boolean checkType(String columnName, String value) {
 		int index = columnIndex(columnName);			
-		if(!columnSchemes.get(index).getType().isInstance(value))
+		if(!columnSchemes.get(index).canBeInitializedWith(value))
 			return false;
 		return true;
 	}
 	
-	public Boolean checkTypes(Map<String, Object> values) {		
-		for(Map.Entry<String, Object> pair : values.entrySet()) {
+	public Boolean checkTypes(Map<String, String> values) {		
+		for(Map.Entry<String, String> pair : values.entrySet()) {
 			if(!checkType(pair.getKey(), pair.getValue()))
 				return false;
-		}
-		
+		}		
 		return true;
 	}
 	
@@ -44,7 +43,7 @@ public class TableScheme implements Serializable{
 		
 		int index = columnIndex(oldName);
 		
-		for(ColumnScheme<?> column : columnSchemes) {
+		for(ColumnScheme column : columnSchemes) {
 			if(column.getColumnName().equals(newName)) {
 				return false;
 			}
@@ -74,14 +73,16 @@ public class TableScheme implements Serializable{
 		return columnSchemes.get(index).getColumnName();
 	}
 	
-	public Object defaultValue(String columnName) {
-		int index = columnIndex(columnName);		
-		return columnSchemes.get(index).getDefaultValue();
+	public dbType getNewInstance(int index) {
+		if(index >= columnSchemes.size())
+			throw new IndexOutOfBoundsException();
+		
+		return columnSchemes.get(index).getInstance();
 	}
 	
-	public Class<?> columnType(String columnName) {
-		int index = columnIndex(columnName);
-		return columnSchemes.get(index).getType();
+	public dbType getNewInstance(String columnName) {
+		int index = columnIndex(columnName);		
+		return columnSchemes.get(index).getInstance();
 	}
 
 }

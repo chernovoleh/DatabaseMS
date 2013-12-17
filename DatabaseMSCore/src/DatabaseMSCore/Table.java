@@ -2,57 +2,19 @@ package DatabaseMSCore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Table implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private TableScheme tableScheme;
-	private ArrayList<Object [] > rows;
-	private String tableName;
-	
-	private class RowsIterator implements Iterator<Object[]> {
-		private ArrayList<Object [] > rows;
-		private int index = 0;
-		
-		public RowsIterator(ArrayList<Object [] > rows) {
-			this.rows = rows;
-		}
-		
-		@Override
-		public boolean hasNext() {
-			return index < rows.size();
-		}
-
-		@Override
-		public Object[] next() {
-			return rows.get(index++);
-		}
-
-		@Override
-		public void remove() {
-			// TODO Auto-generated method stub			
-		}
-		
-	}
-	private class Rows implements Iterable<Object []> {
-		private ArrayList<Object[]> rows;
-		
-		public Rows(ArrayList<Object[]> rows) {
-			this.rows = rows;
-		}
-		@Override
-		public Iterator<Object[]> iterator() {			
-			return new RowsIterator(rows);
-		}
-		
-	}
+	private ArrayList<dbType [] > rows;
+	private String tableName;	
 	
 	public Table(TableScheme tableScheme, String tableName) {
 		this.tableName = tableName;
 		this.tableScheme = tableScheme;
-		rows = new ArrayList<Object []>();
+		rows = new ArrayList<dbType []>();
 	}
 	
 	public int columnsCount() {
@@ -67,24 +29,25 @@ public class Table implements Serializable{
 		return tableName;
 	}
 	
-	public Boolean addRow(Map<String, Object> values) {
+	public Boolean addRow(Map<String, String> values) {
 		if(!tableScheme.checkTypes(values))
 			return false;
 		
-		Object [] row = new Object[tableScheme.columnsCount()];
+		dbType [] row = new dbType[tableScheme.columnsCount()];
 		for(int i = 0; i < row.length; ++i) {
 			String columnName = tableScheme.columnName(i);
-			Object value = values.get(columnName);
-			if(value == null) 
-				value = tableScheme.defaultValue(columnName);	
-			row[i] = value;
+			String value = values.get(columnName);
+			
+			dbType cell = tableScheme.getNewInstance(i);
+			cell.setValue(value);
+			row[i] = cell;
 		}
 		
 		rows.add(row);
 		return true;
 	}
 	
-	public Boolean setValue(int rowIndex, int columnIndex, Object newValue) {
+	public Boolean setValue(int rowIndex, int columnIndex, String newValue) {
 		if(rowIndex >= rows.size())
 			throw new IndexOutOfBoundsException();
 		
@@ -93,7 +56,7 @@ public class Table implements Serializable{
 		if(!tableScheme.checkType(columnName, newValue))
 			return false;
 		
-		rows.get(rowIndex)[columnIndex] = newValue;	
+		rows.get(rowIndex)[columnIndex].setValue(newValue);	
 		return true;
 	}
 	
@@ -115,24 +78,28 @@ public class Table implements Serializable{
 		return tableScheme.changeColumnName(oldName, newName);
 	}
 	
-	public Iterable<Object[]> rows() {
-		return new Rows(rows);
+	public Iterable<dbType[]> rows() {
+		return rows;
 	}
 	
-	public Iterable<Object[]> rows(Map<String, Object> pattern) {
-		ArrayList<Object[]> chosenRows = new ArrayList<Object[]>();
-		for(Object [] row : rows) {
+	public dbType [] getRow(int index) {
+		return rows.get(index);
+	}
+	
+	public Iterable<Integer> rows(Map<String, String> pattern) {
+		ArrayList<Integer> chosenRows = new ArrayList<Integer>();
+		for(int i = 0;i < rows.size();++i) {
 			Boolean flag = true;
-			for(Map.Entry<String, Object> entry : pattern.entrySet()) {
-				int index = tableScheme.columnIndex(entry.getKey());
-				if(!row[index].equals(entry.getValue()))
+			for(Map.Entry<String, String> entry : pattern.entrySet()) {
+				int j = tableScheme.columnIndex(entry.getKey());
+				if(!rows.get(i)[j].toString().equals(entry.getValue()))
 					flag = false;
 			}
 			
 			if(flag)
-				chosenRows.add(row);
+				chosenRows.add(i);
 		}
-		return new Rows(chosenRows);
+		return chosenRows;
 	}	
 	
 	public Iterable<String> columnNames() {
