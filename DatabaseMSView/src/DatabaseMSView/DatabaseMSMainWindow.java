@@ -47,7 +47,61 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 	private DatabaseMSController msController;
 	private JTree dbTree;
 	private JTable table;
+	
+	private TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
+		@Override
+		public void valueChanged(TreeSelectionEvent e) {				
+			TreePath path = dbTree.getSelectionPath();
+			if(path == null)
+				return;
+			DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+			if(selectedNode.getLevel()== 1) {
+				msController.OnSetActiveDatabase(selectedNode.toString());
+			} else if(selectedNode.getLevel()== 2) {
+				msController.OnSetActiveTable(selectedNode.toString());
+			}
+			
+			
+		}
+	};
+	
+	private ActionListener renameColumnActionListener = new ActionListener() {
+		public void actionPerformed(ActionEvent e) {
+			if(table.getModel().getColumnCount() <= 0)
+				return;
+			String [] columnNames = new String[table.getModel().getColumnCount()];
+			for(int i = 0;i < columnNames.length; ++i)
+				columnNames[i] = table.getModel().getColumnName(i);
+			DatabaseMSChangeColumnNameWindow dialog = new DatabaseMSChangeColumnNameWindow(frmDbmanager, columnNames);
+			dialog.show(new DatabaseMSChangeColumnNameWindow.ColumnNameChangedListener() {
 
+				@Override
+				public void columnNameChanged(String oldName, String newName) {
+					msController.OnColumnNameChanged(oldName, newName);
+					
+				}
+			});
+		}
+	};
+	
+	private TableModelListener tableModelListener = new TableModelListener() {
+
+		@Override
+		public void tableChanged(TableModelEvent e) {
+			int row = e.getFirstRow();
+	        int column = e.getColumn();
+	        if(row < 0 || column < 0)
+	        	return;
+	        
+	        if(e.getType() == TableModelEvent.UPDATE) {
+	        	msController.OnUpdateValue(row, column, table.getModel().getValueAt(row, column));
+	        }   
+			
+		}
+		
+	};
+	
+	
 	/**
 	 * Create the application.
 	 */
@@ -83,8 +137,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 
 		        if (returnVal == JFileChooser.APPROVE_OPTION) {
 		           File folder = fc.getSelectedFile();
-		           msController.OnWorkspaceChosen(folder);
-		            //This is where a real application would open the file.
+		           msController.OnWorkspaceChosen(folder);		        
 		        }		            
 			}
 		});
@@ -107,7 +160,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 				if(table.getSelectedRow() >= 0) {
 					int row = table.getSelectedRow();
 					msController.OnRowInserted(row);
-				} else if(dbTree.getSelectionCount() > 0) {
+				} else if(dbTree.getSelectionCount() >= 0) {
 					
 				}
 			}
@@ -121,17 +174,20 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 					int row = table.getSelectedRow();
 					msController.OnRowRemoved(row);
 				} else if(dbTree.getSelectionCount() > 0) {
-					
+					TreePath path = dbTree.getSelectionPath();
+					if(path == null)
+						return;
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+					if(selectedNode.getLevel()== 2) {
+						msController.OnTableRemoved(selectedNode.toString());
+					}
 				}
 			}
 		});
 		mnActions.add(mntmRemove);
 		
 		JMenuItem mntmRenamecolumn = new JMenuItem("RenameColumn");
-		mntmRenamecolumn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-			}
-		});
+		mntmRenamecolumn.addActionListener(renameColumnActionListener);
 		mnActions.add(mntmRenamecolumn);
 		
 		JMenuItem mntmSearch = new JMenuItem("Search");
@@ -147,42 +203,16 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		
 		DefaultMutableTreeNode dbs = new DefaultMutableTreeNode("Databases");
 		dbTree = new JTree(dbs);
-		dbTree.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg) {
-				int row = dbTree.getClosestRowForLocation(arg.getX(), arg.getY());
-				
-				if(SwingUtilities.isRightMouseButton(arg)) {
-					
-				}
-			}
-		});
 		dbTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		dbTree.addTreeSelectionListener(new TreeSelectionListener() {
-			@Override
-			public void valueChanged(TreeSelectionEvent e) {
-				TreePath path = dbTree.getSelectionPath();
-				if(path == null)
-					return;
-				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-				if(selectedNode.getLevel()== 1) {
-					msController.OnSetActiveDatabase(selectedNode.toString());
-				} else if(selectedNode.getLevel()== 2) {
-					msController.OnSetActiveTable(selectedNode.toString());
-				}
-				
-				
-			}
-		});
+		dbTree.addTreeSelectionListener(treeSelectionListener);
 		splitPane.setLeftComponent(dbTree);
 		
 		JScrollPane scrollPane = new JScrollPane();
 		splitPane.setRightComponent(scrollPane);
 		
 		table = new JTable();
-		scrollPane.setViewportView(table);
-		
-		
+		table.getModel().addTableModelListener(tableModelListener);
+		scrollPane.setViewportView(table);		
 	}
 
 	@Override
@@ -191,31 +221,46 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 	}
 
 	@Override
-	public void fillDatabaseTree(Iterable<String> dbNames, String activeDatabaseName, Iterable<String> tblNames) {
+	public void addDatabases(Iterable<String> dbNames) {
 		DefaultTreeModel model = (DefaultTreeModel)dbTree.getModel();
 		DefaultMutableTreeNode dbs = (DefaultMutableTreeNode)model.getRoot();
 		dbs.removeAllChildren();
 		
 		for(String dbName : dbNames) {
 			DefaultMutableTreeNode db = new DefaultMutableTreeNode(dbName);			
-			dbs.add(db);
-			if(activeDatabaseName != null && activeDatabaseName.equals(dbName)) {
-				for(String tblName : tblNames) {
-					DefaultMutableTreeNode tbl = new DefaultMutableTreeNode(tblName);
-					db.add(tbl);
-				}
-			}
-			
+			dbs.add(db);			
 		}
-		model.reload();
-		for(int i = 0;i < dbTree.getRowCount();++i)
-			dbTree.expandRow(i);		
+		model.reload();		
 	}
 
 	@Override
 	public void fillTable(Object[][] rows, Object[] columnNames) {
 		DefaultTableModel model = (DefaultTableModel)table.getModel();
 		model.setDataVector(rows, columnNames);		
+	}
+
+	@Override
+	public void addTablesToDatabase(Iterable<String> tblNames, String dbName) {
+		DefaultTreeModel model = (DefaultTreeModel)dbTree.getModel();
+		DefaultMutableTreeNode dbs = (DefaultMutableTreeNode)model.getRoot();
+		DefaultMutableTreeNode activeDB = null;
+		for(int i = 0;i < dbs.getChildCount();++i) {
+			DefaultMutableTreeNode db = (DefaultMutableTreeNode)dbs.getChildAt(i);
+			db.removeAllChildren();
+			if(db.toString().equals(dbName)) {
+				for(String tblName : tblNames) {
+					DefaultMutableTreeNode tbl = new DefaultMutableTreeNode(tblName);			
+					db.add(tbl);
+				}
+				activeDB = db;
+			}
+			
+		}		
+		model.reload();
+		dbTree.expandPath(new TreePath(activeDB.getPath()));
+		dbTree.removeTreeSelectionListener(treeSelectionListener);
+		dbTree.setSelectionPath(new TreePath(activeDB.getPath()));
+		dbTree.addTreeSelectionListener(treeSelectionListener);
 	}
 
 }

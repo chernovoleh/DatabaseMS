@@ -22,8 +22,10 @@ public class DatabaseManager {
 	}
 	
 	public Boolean loadWorkspace(File folder) {
+		
 		if(folder == null || !folder.isDirectory())
 			return false;
+		databases.clear();
 		
 		for (final File fileEntry : folder.listFiles()) {
 			if(!fileEntry.isFile())	
@@ -110,5 +112,13 @@ public class DatabaseManager {
 			dbNames.add(db.name());
 		}
 		return dbNames;
+	}
+	
+	public void removeActiveTable() {
+		if(activeTable == null)
+			return;
+		
+		activeDB.removeTable(activeTable.name());
+		activeTable = null;
 	}
 }

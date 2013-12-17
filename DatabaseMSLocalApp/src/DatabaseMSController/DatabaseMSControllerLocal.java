@@ -23,7 +23,8 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		if(!dbManager.loadWorkspace(folder))
 			return false;
 		
-		msView.fillDatabaseTree(dbManager.databaseNames(), null, null);		
+		msView.addDatabases(dbManager.databaseNames());	
+		fillTable();
 		return true;
 	}
 
@@ -32,22 +33,29 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		if(!dbManager.setActiveDB(dbName))
 			return false;
 		
-		msView.fillDatabaseTree(dbManager.databaseNames(), dbManager.activeDatabase().name(), dbManager.activeDatabase().tableNames());
-		return null;
+		msView.addTablesToDatabase(dbManager.activeDatabase().tableNames(), dbName);
+		return true;
 	}
 	
 	private void fillTable() {
-		Object[][] rows = new Object[dbManager.activeTable().rowsCount()][];
-		int i = 0;
-		for(Object[] row : dbManager.activeTable().rows())
-			rows[i++] = row;
-		
-		Object [] columnNames = new Object[dbManager.activeTable().columnsCount()];
-		int j = 0;
-		for(String columnName : dbManager.activeTable().columnNames())
-			columnNames[j++] = columnName;
-		
-		msView.fillTable(rows, columnNames);
+		if(dbManager.activeTable() == null)
+		{
+			msView.fillTable(null, null);
+		}
+		else
+		{
+			Object[][] rows = new Object[dbManager.activeTable().rowsCount()][];
+			int i = 0;
+			for(Object[] row : dbManager.activeTable().rows())
+				rows[i++] = row;
+			
+			Object [] columnNames = new Object[dbManager.activeTable().columnsCount()];
+			int j = 0;
+			for(String columnName : dbManager.activeTable().columnNames())
+				columnNames[j++] = columnName;
+			
+			msView.fillTable(rows, columnNames);
+		}
 	}
 
 	@Override
@@ -90,6 +98,26 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		table.removeRow(rowIndex);
 		fillTable();
 		return null;		
+	}
+
+	@Override
+	public Boolean OnTableRemoved(String tableName) {
+		dbManager.removeActiveTable();
+		OnSetActiveDatabase(dbManager.activeDatabase().name());
+		fillTable();
+		
+		return true;
+	}
+
+	@Override
+	public Boolean OnColumnNameChanged(String oldName, String newName) {
+		if(dbManager.activeTable() == null)
+			return false;
+		if(!dbManager.activeTable().changeColumnName(oldName, newName))
+			return false;
+		
+		fillTable();
+		return true;
 	}
 
 }

@@ -53,7 +53,7 @@ public class Database implements Serializable{
 	
 	public Table table(String tableName) {
 		for(Table t : tables) {
-			if(t.name() == tableName)
+			if(t.name().equals(tableName))
 				return t;
 			
 		}		
@@ -62,7 +62,7 @@ public class Database implements Serializable{
 	
 	public Boolean addTable(TableScheme tableScheme, String tableName) {
 		for(Table t : tables) {
-			if(t.name() == tableName)
+			if(t.name().equals(tableName))
 				return false;			
 		}	
 		
@@ -73,7 +73,7 @@ public class Database implements Serializable{
 	
 	public Boolean removeTable(String tableName) {
 		for(Table t : tables) {
-			if(t.name() == tableName) {
+			if(t.name().equals(tableName)) {
 				tables.remove(t);
 				return true;
 			}			
