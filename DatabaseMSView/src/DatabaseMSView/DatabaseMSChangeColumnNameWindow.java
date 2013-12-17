@@ -43,7 +43,6 @@ public class DatabaseMSChangeColumnNameWindow {
 		frmChangeColumnDialog.setResizable(false);
 		frmChangeColumnDialog.setTitle("Change column name dialog");
 		frmChangeColumnDialog.setBounds(100, 100, 300, 133);
-		//frmChangeColumnDialog.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
 		frmChangeColumnDialog.getContentPane().setLayout(null);
 		
 		JLabel lblColumn = new JLabel("Column");

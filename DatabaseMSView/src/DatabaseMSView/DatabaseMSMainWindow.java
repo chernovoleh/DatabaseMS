@@ -164,6 +164,21 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 					int row = tableView.getSelectedRow();
 					msController.OnRowInserted(row);
 				} else if(dbTree.getSelectionCount() >= 0) {
+					TreePath path = dbTree.getSelectionPath();
+					if(path == null)
+						return;
+					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+					if(selectedNode.getLevel() == 1) {
+						DatabaseMSCreateTableWindow dialog = new DatabaseMSCreateTableWindow(frmDbmanager);
+						dialog.show(new DatabaseMSCreateTableWindow.TableCreatedListener() {
+
+							@Override
+							public void tableCreated(String tableName, Map<String, Class<?>> columnSchemes) {
+								// TODO Auto-generated method stub
+								
+							}
+						});
+					}
 					
 				}
 			}
