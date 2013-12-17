@@ -1,7 +1,15 @@
 package DatabaseMSView;
 
+import java.util.EventObject;
+
+import javax.swing.CellEditor;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -11,6 +19,26 @@ import DatabaseMS.DatabaseMSController;
 public class DatabaseMSTableView {
 	private JTable table;
 	private DatabaseMSController msController;	
+	
+	private class DbCellEditor extends DefaultCellEditor  {	
+		private String columnName;
+		
+		public DbCellEditor(String columnName) {
+			super(new JTextField());
+			this.columnName = columnName;			
+		}
+
+		@Override
+	    public boolean stopCellEditing() {
+			JTextField textField = (JTextField)super.editorComponent;
+	        String value = textField.getText();
+	        
+	        Boolean verified = msController.IsValueValid(columnName, value);
+			return verified && super.stopCellEditing();
+	    }
+		
+	}
+
 	
 	private TableModelListener tableModelListener = new TableModelListener() {
 
@@ -31,7 +59,7 @@ public class DatabaseMSTableView {
 	
 	public DatabaseMSTableView() {
 		table = new JTable();
-		table.getModel().addTableModelListener(tableModelListener);
+		table.getModel().addTableModelListener(tableModelListener);		
 	}
 	
 	public void setController(DatabaseMSController msController) {
@@ -61,5 +89,12 @@ public class DatabaseMSTableView {
 	public void fileTable(Object[][] rows, Object[] columnNames) {
 		DefaultTableModel model = (DefaultTableModel)table.getModel();
 		model.setDataVector(rows, columnNames);
+		
+		if(columnNames == null)
+			return;
+		
+		for(Object columnName : columnNames) {
+			table.getColumn(columnName).setCellEditor(new DbCellEditor(columnName.toString()));
+		}
 	}
 }

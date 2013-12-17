@@ -15,4 +15,6 @@ public interface DatabaseMSController {
 	
 	Boolean OnTableRemoved(String tableName);
 	Boolean OnColumnNameChanged(String oldName, String newName);
+	
+	Boolean IsValueValid(String columnName, String value);
 }

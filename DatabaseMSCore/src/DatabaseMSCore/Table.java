@@ -109,5 +109,9 @@ public class Table implements Serializable{
 		
 		return columnNames;
 	}
+	
+	public Boolean checkType(String columnName, String value) {
+		return tableScheme.checkType(columnName, value);
+	}
 
 }

@@ -120,4 +120,10 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		return true;
 	}
 
+	@Override
+	public Boolean IsValueValid(String columnName, String value) {
+		Table activeTable = dbManager.activeTable();
+		return activeTable.checkType(columnName, value);
+	}
+
 }
