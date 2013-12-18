@@ -12,6 +12,8 @@ import DatabaseMSCore.Table;
 import DatabaseMSCore.TableScheme;
 import DatabaseMSCore.dbType;
 import DatabaseMSCore.dbTypeCharacter;
+import DatabaseMSCore.dbTypeDate;
+import DatabaseMSCore.dbTypeDateInterval;
 import DatabaseMSCore.dbTypeDouble;
 import DatabaseMSCore.dbTypeInteger;
 import DatabaseMSCore.dbTypeString;
@@ -166,7 +168,8 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 	@Override
 	public String[] GetDbTypeNames() {
 		String [] typeNames = {dbTypeString.class.getSimpleName(), dbTypeInteger.class.getSimpleName(), 
-				               dbTypeDouble.class.getSimpleName(), dbTypeCharacter.class.getSimpleName()};
+				               dbTypeDouble.class.getSimpleName(), dbTypeCharacter.class.getSimpleName(),
+				               dbTypeDate.class.getSimpleName(), dbTypeDateInterval.class.getSimpleName()};
 		return typeNames;
 	}
 

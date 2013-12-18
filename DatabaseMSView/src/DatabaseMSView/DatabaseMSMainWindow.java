@@ -223,6 +223,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		
 		tableView = new DatabaseMSTableView();		
 		tableView.registrate(scrollPane);		
+		splitPane.setResizeWeight(0.4);
 	}
 
 	@Override
