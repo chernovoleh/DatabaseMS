@@ -9,6 +9,8 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javax.swing.plaf.metal.MetalIconFactory.FolderIcon16;
+
 public class DatabaseManager {
 	final static Class<?> [] allowedTypes = {Integer.class, Double.class, Character.class, String.class};
 	
@@ -120,5 +122,18 @@ public class DatabaseManager {
 		
 		activeDB.removeTable(activeTable.name());
 		activeTable = null;
+	}
+	
+	public Boolean isWorkspaceLoaded() {
+		return workspaceFolder != null;
+	}
+	
+	public Boolean addDatabase(String dbName) {
+		for(String dn: databaseNames())
+			if(dn.equals(dbName))
+				return false;
+		
+		databases.add(new Database(dbName));
+		return true;
 	}
 }

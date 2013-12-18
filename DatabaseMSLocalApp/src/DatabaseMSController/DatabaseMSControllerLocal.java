@@ -163,7 +163,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 			foundRows.add(i);
 		
 		fillTable(foundRows);
-		return null;
+		return true;
 	}
 
 	@Override
@@ -178,6 +178,18 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		
 		OnSetActiveDatabase(dbManager.activeDatabase().name());
 		OnSetActiveTable(tableName);		
+		return true;
+	}
+
+	@Override
+	public Boolean OnDatabaseCreated(String dbName) {
+		if(!dbManager.isWorkspaceLoaded())
+			return false;
+		
+		if(!dbManager.addDatabase(dbName))
+			return false;
+		
+		msView.addDatabases(dbManager.databaseNames());
 		return true;
 	}
 }

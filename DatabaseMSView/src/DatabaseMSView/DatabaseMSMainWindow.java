@@ -117,7 +117,11 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 				}	
 				else if (selectedNode.getLevel() == 2) {
 					msController.OnRowInserted(tableView.getRowCount());
+				} else if(selectedNode.getLevel() == 0) {
+					msController.OnDatabaseCreated("Database1");
 				}
+					
+				
 			}
 		}
 	};

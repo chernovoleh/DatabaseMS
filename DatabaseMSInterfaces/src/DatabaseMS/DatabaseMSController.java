@@ -20,6 +20,8 @@ public interface DatabaseMSController {
 	Boolean OnColumnNameChanged(String oldName, String newName);
 	Boolean OnSearchByPattern(Map<String, String> pattern);
 	
+	Boolean OnDatabaseCreated(String dbName);
+	
 	String [] GetDbTypeNames();
 	Boolean IsValueValid(String columnName, String value);
 }
