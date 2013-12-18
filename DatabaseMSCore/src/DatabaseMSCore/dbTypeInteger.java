@@ -6,6 +6,7 @@ public class dbTypeInteger implements dbType {
 	private Integer value;
 	@Override
 	public Boolean canBeInitializedWith(String val) {
+		if(val.isEmpty()) return true;
 		try {
 		      Integer.parseInt(val);
 		} catch (NumberFormatException e) {
@@ -17,6 +18,11 @@ public class dbTypeInteger implements dbType {
 
 	@Override
 	public Boolean setValue(String val) {
+		if(val.isEmpty()) {
+			value = null;
+			return true;		
+		}
+			
 		try {
 		      value = Integer.parseInt(val);
 		} catch (NumberFormatException e) {
@@ -27,6 +33,8 @@ public class dbTypeInteger implements dbType {
 
 	@Override
 	public String toString() {
+		if(value == null)
+			return new String();
 		return value.toString();
 	}
 

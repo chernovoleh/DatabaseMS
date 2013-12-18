@@ -6,20 +6,23 @@ public class dbTypeCharacter implements dbType {
 	private Character value; 
 	@Override
 	public Boolean canBeInitializedWith(String val) {
-		return val.length() == 1;
+		return val.length() < 2;
 	}
 
 	@Override
 	public Boolean setValue(String val) {
-		if(val.length() != 1)
+		if(val.length() > 1)
 			return false;
 		
-		value = val.charAt(0);
+		
+		value = val.length() == 1 ? val.charAt(0) : null;
 		return true;
 	}
 
 	@Override
 	public String toString() {
+		if(value == null)
+			return new String();
 		return value.toString();
 	}
 

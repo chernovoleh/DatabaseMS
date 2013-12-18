@@ -37,6 +37,7 @@ public class Table implements Serializable{
 		for(int i = 0; i < row.length; ++i) {
 			String columnName = tableScheme.columnName(i);
 			String value = values.get(columnName);
+			if(value == null) value = new String();
 			
 			dbType cell = tableScheme.getNewInstance(i);
 			cell.setValue(value);
