@@ -1,12 +1,16 @@
 package DatabaseMSView;
 
+import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.DefaultCellEditor;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -15,12 +19,50 @@ import javax.swing.JComboBox;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 
+import DatabaseMS.DatabaseMSController;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+
 public class DatabaseMSCreateTableWindow {
 	private JDialog createTableDialog;
 	private JTextField textField;
-	private JScrollPane scrollPane;
-	private ArrayList<JComboBox> typeSelectors;
-	private ArrayList<JTextField> nameSelectors;
+	private JTable table;
+	private DatabaseMSController msController;
+	
+	@SuppressWarnings("serial")
+	private class TypeColumnCellEditor extends DefaultCellEditor  {	
+		public TypeColumnCellEditor() {
+			super(new JComboBox<String>());
+			JComboBox<String> editor = (JComboBox<String>)super.getComponent();
+			
+			String [] columnTypes = msController.GetDbTypeNames();
+			for(String ct : Arrays.asList(columnTypes))
+				editor.addItem(ct);							
+		}		
+	}
+	
+	@SuppressWarnings("serial")
+	private class NameColumnCellEditor extends DefaultCellEditor  {	
+		public NameColumnCellEditor() {
+			super(new JTextField());										
+		}
+		
+		@Override
+	    public boolean stopCellEditing() {
+			JTextField textField = (JTextField)super.editorComponent;
+	        String value = textField.getText();
+	        Boolean ok = true;
+	        for(int i = 0;i < table.getRowCount();++i) {
+	           	if(table.getValueAt(i, 0) == null) continue;
+	           	String columnName = (String)table.getValueAt(i, 0);
+	           	if(columnName.trim().equals(value.trim()))
+	           		ok = false;
+	        }
+	        
+	        return ok && super.stopCellEditing();
+	    }
+	}
 
 	/**
 	 * Create the application.
@@ -30,13 +72,11 @@ public class DatabaseMSCreateTableWindow {
 		initialize();
 	}
 	
-	public interface TableCreatedListener {
-		void tableCreated(String tableName, Map<String, Class<?>> columnSchemes);
-	}
+	public void setController(DatabaseMSController msController) {
+		this.msController = msController;
+	}	
 	
-	public TableCreatedListener tableCreatedListener;
-	public void show(TableCreatedListener tableCreatedListener) {
-		this.tableCreatedListener = tableCreatedListener;
+	public void show() {		
 		createTableDialog.setVisible(true);
 	}
 	
@@ -45,9 +85,6 @@ public class DatabaseMSCreateTableWindow {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		typeSelectors = new ArrayList<JComboBox>();
-		nameSelectors = new ArrayList<JTextField>();
-		
 		createTableDialog.setTitle("Create table dialog");
 		createTableDialog.setBounds(100, 100, 322, 296);
 		createTableDialog.getContentPane().setLayout(null);
@@ -65,49 +102,71 @@ public class DatabaseMSCreateTableWindow {
 		lblRowsCount.setBounds(183, 11, 67, 14);
 		createTableDialog.getContentPane().add(lblRowsCount);
 		
-		scrollPane = new JScrollPane();
+		JScrollPane scrollPane  = new JScrollPane();
 		scrollPane.setBounds(10, 36, 291, 184);
 		createTableDialog.getContentPane().add(scrollPane);
 		
-		JComboBox comboBox = new JComboBox();
+		table = new JTable();
+		scrollPane.setViewportView(table);
+		
+		JComboBox<Integer> comboBox = new JComboBox<Integer>();
 		comboBox.setBounds(252, 8, 49, 20);
 		for(Integer i = 0;i < 10; ++i)
-			comboBox.addItem(i.toString());
+			comboBox.addItem(i);
 		comboBox.addActionListener(new ActionListener() {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				JComboBox cb = (JComboBox)e.getSource();
-		        String item = (String)cb.getSelectedItem();
-		        Integer columnsNum = Integer.parseInt(item);
+				JComboBox<Integer> cb = (JComboBox<Integer>)e.getSource();
+		        Integer columnsNum = (Integer)cb.getSelectedItem();
 		        
-		        typeSelectors.clear();
-		        nameSelectors.clear();
-		        scrollPane.removeAll();
-		        //ScrollPane gridLayout = new GridLayout(0,2);
-		        //scrollPane.setLayout(gridLayout);
-		        for(int i = 0;i < columnsNum;++i) {
-		        	JComboBox typeSelector = new JComboBox();
-		        	JTextField nameSelector = new JTextField();
-		        	typeSelectors.add(typeSelector);
-		        	nameSelectors.add(nameSelector);
-		        	scrollPane.add(typeSelector);
-		        	scrollPane.add(nameSelector);      	
-		        	
-		        }        
-		        
-			}
-			
+		        Object [] columnNames = {"Column name", "Column type"};
+		        Object [][] rows = new Object[columnsNum][2];
+		        DefaultTableModel model = (DefaultTableModel)table.getModel();
+				model.setDataVector(rows, columnNames);	        
+				table.getColumn("Column type").setCellEditor(new TypeColumnCellEditor());
+				table.getColumn("Column name").setCellEditor(new NameColumnCellEditor());
+			}			
 		});
 		createTableDialog.getContentPane().add(comboBox);
 		
 		JButton btnOk = new JButton("Ok");
+		btnOk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				String tableName = textField.getText().trim(); 
+				if(tableName.isEmpty())
+					return;
+				
+				Map<String, String> tableScheme = new HashMap<String, String>();
+				for(int i = 0;i < table.getRowCount();++i) {
+					
+					if(table.getValueAt(i, 0) == null || table.getValueAt(i, 1) == null)
+						return;
+					
+					String columnName = table.getValueAt(i, 0).toString();
+					String columnType = table.getValueAt(i, 1).toString();
+					
+					if(columnName.isEmpty() || columnType.isEmpty())
+						return;
+					
+					tableScheme.put(columnName, columnType);					
+				}
+				if(!msController.OnTableAdded(tableName, tableScheme))
+					return;
+				
+				createTableDialog.setVisible(false);
+			}
+		});
 		btnOk.setBounds(44, 231, 89, 23);
 		createTableDialog.getContentPane().add(btnOk);
 		
 		JButton btnCancel = new JButton("Cancel");
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				createTableDialog.setVisible(false);
+			}
+		});
 		btnCancel.setBounds(161, 231, 89, 23);
 		createTableDialog.getContentPane().add(btnCancel);
 	}
-
 }

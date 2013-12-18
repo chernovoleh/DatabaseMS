@@ -56,13 +56,7 @@ public class DatabaseMSPatternWindow {
 		initialize();
 	}
 	
-	public interface PatternCreatedListener {
-		void patternCreated(Map<String, String> pattern);
-	}
-	private PatternCreatedListener patternCreatedListener; 
-	
-	public void show(PatternCreatedListener patternCreatedListener) {
-		this.patternCreatedListener = patternCreatedListener;		
+	public void show() {
 		searchPatternDialog.setVisible(true);
 	}
 	
@@ -92,7 +86,8 @@ public class DatabaseMSPatternWindow {
 						pattern.put(columnNames[i], table.getValueAt(0, i).toString());
 				}
 				
-				patternCreatedListener.patternCreated(pattern);
+				if(!msController.OnSearchByPattern(pattern))
+					return;
 				searchPatternDialog.setVisible(false);
 			}
 		});

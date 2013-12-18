@@ -27,12 +27,12 @@ public class UnitTestDatabaseSerialization {
 	public void test() throws IOException, ClassNotFoundException {
 		TableScheme ts1 = new TableScheme();
 		TableScheme ts2 = new TableScheme();
-		ts1.pushBackColumn(new ColumnScheme("Name", dbTypeString.class));
-		ts1.pushBackColumn(new ColumnScheme("Age", dbTypeInteger.class));
-		ts1.pushBackColumn(new ColumnScheme("Weight", dbTypeDouble.class));
-		ts2.pushBackColumn(new ColumnScheme("Name", dbTypeString.class));
-		ts2.pushBackColumn(new ColumnScheme("Age", dbTypeInteger.class));
-		ts2.pushBackColumn(new ColumnScheme("Weight", dbTypeDouble.class));
+		ts1.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
+		ts1.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
+		ts1.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
+		ts2.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
+		ts2.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
+		ts2.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
 		
 		Database db1 = new Database("Db1");
 		assertTrue(db1.addTable(ts1, "Table1"));

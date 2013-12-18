@@ -6,8 +6,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import DatabaseMS.DatabaseMSController;
+import DatabaseMSCore.ColumnScheme;
 import DatabaseMSCore.DatabaseManager;
 import DatabaseMSCore.Table;
+import DatabaseMSCore.TableScheme;
+import DatabaseMSCore.dbType;
+import DatabaseMSCore.dbTypeCharacter;
+import DatabaseMSCore.dbTypeDouble;
+import DatabaseMSCore.dbTypeInteger;
+import DatabaseMSCore.dbTypeString;
 import DatabaseMS.DatabaseMSView;
 
 public class DatabaseMSControllerLocal implements DatabaseMSController {
@@ -156,4 +163,34 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		return null;
 	}
 
+	@Override
+	public String[] GetDbTypeNames() {
+		String [] typeNames = {dbTypeString.class.getSimpleName(), dbTypeInteger.class.getSimpleName(), 
+				               dbTypeDouble.class.getSimpleName(), dbTypeCharacter.class.getSimpleName()};
+		return typeNames;
+	}
+
+	@Override
+	public Boolean OnTableAdded(String tableName, Map<String, String> tableScheme) {
+		TableScheme ts = new TableScheme();
+		for(Map.Entry<String, String> entry : tableScheme.entrySet()) {
+			ColumnScheme cs;
+			try {
+				cs = new ColumnScheme(entry.getKey()
+						,(Class<? extends dbType>) Class.forName("DatabaseMSCore." + entry.getValue()));
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			ts.addColumnScheme(cs);
+		}
+		
+		if(!dbManager.activeDatabase().addTable(ts, tableName))
+			return false;
+		
+		OnSetActiveDatabase(dbManager.activeDatabase().name());
+		OnSetActiveTable(tableName);		
+		return true;
+	}
 }

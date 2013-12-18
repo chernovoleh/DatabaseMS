@@ -92,16 +92,36 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 				columnNames[i] = tableView.getColumnName(i);
 			DatabaseMSPatternWindow dialog = new DatabaseMSPatternWindow(frmDbmanager, columnNames);
 			dialog.setController(msController);
-			dialog.show(new DatabaseMSPatternWindow.PatternCreatedListener() {
-
-				@Override
-				public void patternCreated(Map<String, String> pattern) {
-					msController.OnSearchByPattern(pattern);					
-				}
-				
-			});
+			dialog.show();
 		}
 	};
+	
+	private ActionListener addMenuListener = new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			
+			if(tableView.getSelectedRow() >= 0) {
+				int row = tableView.getSelectedRow();
+				msController.OnRowInserted(row+1);
+				
+			} else if(dbTree.getSelectionCount() >= 0) {
+				TreePath path = dbTree.getSelectionPath();
+				if(path == null)
+					return;
+				DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
+				if(selectedNode.getLevel() == 1) {
+					DatabaseMSCreateTableWindow dialog = new DatabaseMSCreateTableWindow(frmDbmanager);
+					dialog.setController(msController);
+					dialog.show();
+				}	
+				else if (selectedNode.getLevel() == 2) {
+					msController.OnRowInserted(tableView.getRowCount());
+				}
+			}
+		}
+	};
+	
 	
 	
 	/**
@@ -158,31 +178,7 @@ public class DatabaseMSMainWindow implements DatabaseMSView{
 		menuBar.add(mnActions);
 		
 		JMenuItem mntmAdd = new JMenuItem("Add");
-		mntmAdd.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				if(tableView.getSelectedRow() >= 0) {
-					int row = tableView.getSelectedRow();
-					msController.OnRowInserted(row);
-				} else if(dbTree.getSelectionCount() >= 0) {
-					TreePath path = dbTree.getSelectionPath();
-					if(path == null)
-						return;
-					DefaultMutableTreeNode selectedNode = (DefaultMutableTreeNode)path.getLastPathComponent();
-					if(selectedNode.getLevel() == 1) {
-						DatabaseMSCreateTableWindow dialog = new DatabaseMSCreateTableWindow(frmDbmanager);
-						dialog.show(new DatabaseMSCreateTableWindow.TableCreatedListener() {
-
-							@Override
-							public void tableCreated(String tableName, Map<String, Class<?>> columnSchemes) {
-								// TODO Auto-generated method stub
-								
-							}
-						});
-					}
-					
-				}
-			}
-		});
+		mntmAdd.addActionListener(addMenuListener);
 		mnActions.add(mntmAdd);
 		
 		JMenuItem mntmRemove = new JMenuItem("Remove");

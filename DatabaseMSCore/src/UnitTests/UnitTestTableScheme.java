@@ -20,13 +20,13 @@ public class UnitTestTableScheme {
 		String columnNames [] = {"Name", "Age", "Weight"};
 		
 		TableScheme ts = new TableScheme();
-		Boolean test1 = ts.pushBackColumn(new ColumnScheme(columnNames[0], dbTypeString.class));
+		Boolean test1 = ts.addColumnScheme(new ColumnScheme(columnNames[0], dbTypeString.class));
 		assertTrue(test1);
-		Boolean test2 = ts.pushBackColumn(new ColumnScheme(columnNames[1], dbTypeInteger.class));
+		Boolean test2 = ts.addColumnScheme(new ColumnScheme(columnNames[1], dbTypeInteger.class));
 		assertTrue(test2);
-		Boolean test2_ = ts.pushBackColumn(new ColumnScheme(columnNames[1], dbTypeInteger.class));
+		Boolean test2_ = ts.addColumnScheme(new ColumnScheme(columnNames[1], dbTypeInteger.class));
 		assertFalse(test2_);
-		Boolean test3 = ts.pushBackColumn(new ColumnScheme(columnNames[2], dbTypeDouble.class));
+		Boolean test3 = ts.addColumnScheme(new ColumnScheme(columnNames[2], dbTypeDouble.class));
 		assertTrue(test3);
 		
 		Map<String, String> values = new HashMap<String, String>();

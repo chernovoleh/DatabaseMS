@@ -13,7 +13,7 @@ public class TableScheme implements Serializable{
 		columnSchemes = new ArrayList<ColumnScheme>();
 	}
 	
-	public <T> Boolean pushBackColumn(ColumnScheme column) {
+	public <T> Boolean addColumnScheme(ColumnScheme column) {
 		for(ColumnScheme cs : columnSchemes)
 			if(cs.getColumnName().equals(column.getColumnName()))
 				return false;

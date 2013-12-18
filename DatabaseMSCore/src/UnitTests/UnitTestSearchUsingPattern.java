@@ -19,9 +19,9 @@ public class UnitTestSearchUsingPattern {
 	@Test
 	public void test() {
 		TableScheme ts = new TableScheme();
-		ts.pushBackColumn(new ColumnScheme("Name", dbTypeString.class));
-		ts.pushBackColumn(new ColumnScheme("Age", dbTypeInteger.class));
-		ts.pushBackColumn(new ColumnScheme("Weight", dbTypeDouble.class));
+		ts.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
+		ts.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
+		ts.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
 		
 		Table table = new Table(ts, "Table");
 		
