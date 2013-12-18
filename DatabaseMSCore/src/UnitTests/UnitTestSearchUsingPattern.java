@@ -17,11 +17,11 @@ import DatabaseMSCore.dbTypeString;
 public class UnitTestSearchUsingPattern {
 
 	@Test
-	public void test() {
+	public void test() throws ClassNotFoundException {
 		TableScheme ts = new TableScheme();
-		ts.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
-		ts.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
-		ts.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
+		ts.addColumnScheme(new ColumnScheme("Name", dbTypeString.class.getSimpleName()));
+		ts.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class.getSimpleName()));
+		ts.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class.getSimpleName()));
 		
 		Table table = new Table(ts, "Table");
 		

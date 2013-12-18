@@ -3,6 +3,7 @@ package DatabaseMSCore;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Database implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -60,7 +61,7 @@ public class Database implements Serializable{
 		return null;
 	}
 	
-	public Boolean addTable(TableScheme tableScheme, String tableName) {
+	private Boolean addTable(String tableName, TableScheme tableScheme) {
 		for(Table t : tables) {
 			if(t.name().equals(tableName))
 				return false;			
@@ -83,5 +84,23 @@ public class Database implements Serializable{
 	
 	public Iterable<String> tableNames() {
 		return new TableNames();
+	}
+	
+	public Boolean addTable(String tableName, Map<String, String> tableScheme) {
+		TableScheme ts = new TableScheme();
+		for(Map.Entry<String, String> entry : tableScheme.entrySet()) {
+			ColumnScheme cs;
+			try {
+				cs = new ColumnScheme(entry.getKey(), entry.getValue());
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				return false;
+			}
+			ts.addColumnScheme(cs);
+		}
+		
+		
+		return addTable(tableName, ts);
 	}
 }

@@ -25,18 +25,20 @@ public class UnitTestDatabaseSerialization {
 
 	@Test
 	public void test() throws IOException, ClassNotFoundException {
-		TableScheme ts1 = new TableScheme();
-		TableScheme ts2 = new TableScheme();
-		ts1.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
-		ts1.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
-		ts1.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
-		ts2.addColumnScheme(new ColumnScheme("Name", dbTypeString.class));
-		ts2.addColumnScheme(new ColumnScheme("Age", dbTypeInteger.class));
-		ts2.addColumnScheme(new ColumnScheme("Weight", dbTypeDouble.class));
+		Map<String, String> ts1 = new HashMap<String, String>();
+		Map<String, String> ts2 = new HashMap<String, String>();
+		ts1.put("Name", dbTypeString.class.getSimpleName());
+		ts1.put("Age", dbTypeInteger.class.getSimpleName());
+		ts1.put("Weight", dbTypeDouble.class.getSimpleName());
+		ts1.put("Country", "Enum|Ukraine|USA");
+		ts2.put("Name", dbTypeString.class.getSimpleName());
+		ts2.put("Age", dbTypeInteger.class.getSimpleName());
+		ts2.put("Weight", dbTypeDouble.class.getSimpleName());
+		ts2.put("Country", "Enum|Ukraine|USA");
 		
 		Database db1 = new Database("Db1");
-		assertTrue(db1.addTable(ts1, "Table1"));
-		assertTrue(db1.addTable(ts2, "Table2"));
+		assertTrue(db1.addTable("Table1", ts1));
+		assertTrue(db1.addTable("Table2", ts2));
 		
 		Table table1 = db1.table("Table1");
 		Table table2 = db1.table("Table2");
@@ -45,6 +47,7 @@ public class UnitTestDatabaseSerialization {
 		row1.put("Name", "QQQ");
 		row1.put("Age", "22");
 		row1.put("Weight", "44.0");
+		row1.put("Country", "USA");
 		
 		table1.addRow(row1);
 		table2.addRow(row1);
@@ -72,6 +75,7 @@ public class UnitTestDatabaseSerialization {
 				assertTrue(row[0].toString().equals("QQQ"));
 				assertTrue(row[1].toString().equals("22"));
 				assertTrue(row[2].toString().equals("44.0"));
+				assertTrue(row[3].toString().equals("USA"));
 			}
 		}
 	}

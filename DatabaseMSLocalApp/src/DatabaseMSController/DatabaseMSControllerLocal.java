@@ -44,6 +44,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 			return false;
 		
 		msView.addTablesToDatabase(dbManager.activeDatabase().tableNames(), dbName);
+		fillTable();
 		return true;
 	}
 	
@@ -167,29 +168,12 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public String[] GetDbTypeNames() {
-		String [] typeNames = {dbTypeString.class.getSimpleName(), dbTypeInteger.class.getSimpleName(), 
-				               dbTypeDouble.class.getSimpleName(), dbTypeCharacter.class.getSimpleName(),
-				               dbTypeDate.class.getSimpleName(), dbTypeDateInterval.class.getSimpleName()};
-		return typeNames;
+		return ColumnScheme.getTypeNames();
 	}
 
 	@Override
 	public Boolean OnTableAdded(String tableName, Map<String, String> tableScheme) {
-		TableScheme ts = new TableScheme();
-		for(Map.Entry<String, String> entry : tableScheme.entrySet()) {
-			ColumnScheme cs;
-			try {
-				cs = new ColumnScheme(entry.getKey()
-						,(Class<? extends dbType>) Class.forName("DatabaseMSCore." + entry.getValue()));
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				return false;
-			}
-			ts.addColumnScheme(cs);
-		}
-		
-		if(!dbManager.activeDatabase().addTable(ts, tableName))
+		if(!dbManager.activeDatabase().addTable(tableName, tableScheme))
 			return false;
 		
 		OnSetActiveDatabase(dbManager.activeDatabase().name());

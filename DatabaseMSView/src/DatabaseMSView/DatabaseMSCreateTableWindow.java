@@ -29,16 +29,49 @@ public class DatabaseMSCreateTableWindow {
 	private JTextField textField;
 	private JTable table;
 	private DatabaseMSController msController;
+	private Map<String, String> enums;
 	
 	@SuppressWarnings("serial")
 	private class TypeColumnCellEditor extends DefaultCellEditor  {	
+		private JComboBox<String> editor;
+		
 		public TypeColumnCellEditor() {
 			super(new JComboBox<String>());
-			JComboBox<String> editor = (JComboBox<String>)super.getComponent();
+			editor = (JComboBox<String>)super.getComponent();
 			
 			String [] columnTypes = msController.GetDbTypeNames();
 			for(String ct : Arrays.asList(columnTypes))
-				editor.addItem(ct);							
+				editor.addItem(ct);	
+			
+			editor.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					JComboBox<String> cb = (JComboBox<String>)e.getSource();
+					if(cb.getSelectedItem() == null) 
+						return;
+			        String typeName = (String)cb.getSelectedItem();
+			        if(!typeName.equals("dbTypeEnum"))
+			        	return;
+			        
+			        DatabaseMSAddEnumWindow dialog = new DatabaseMSAddEnumWindow(createTableDialog);
+			        dialog.show(new DatabaseMSAddEnumWindow.EnumCreatedListener() {
+						
+						@Override
+						public void enumCreated(String[] enumValues) {
+							StringBuilder enumType = new StringBuilder();
+							for(int i = 0;i < enumValues.length; ++i)
+								enumType.append("|").append(enumValues[i]);
+							
+							enumType.insert(0, "dbTypeEnum");
+							String item = enumType.toString();
+							editor.addItem(item);
+							editor.setSelectedItem(item);
+						}
+					});
+					
+				}
+			});
 		}		
 	}
 	
@@ -68,6 +101,7 @@ public class DatabaseMSCreateTableWindow {
 	 * Create the application.
 	 */
 	public DatabaseMSCreateTableWindow(JFrame owner) {
+		enums = new HashMap<String, String>();
 		createTableDialog = new JDialog(owner, Dialog.ModalityType.APPLICATION_MODAL);
 		initialize();
 	}
@@ -143,8 +177,8 @@ public class DatabaseMSCreateTableWindow {
 					if(table.getValueAt(i, 0) == null || table.getValueAt(i, 1) == null)
 						return;
 					
-					String columnName = table.getValueAt(i, 0).toString();
-					String columnType = table.getValueAt(i, 1).toString();
+					String columnName = table.getValueAt(i, 0).toString().trim();
+					String columnType = table.getValueAt(i, 1).toString().trim();
 					
 					if(columnName.isEmpty() || columnType.isEmpty())
 						return;
