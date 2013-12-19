@@ -79,12 +79,20 @@ public class Table implements Serializable{
 		return tableScheme.changeColumnName(oldName, newName);
 	}
 	
-	public Iterable<dbType[]> rows() {
-		return rows;
+	public Iterable<String[]> rows() {
+		ArrayList<String[]> stringRows = new ArrayList<String[]>();
+		for(int index = 0;index < rows.size();++index) {
+			stringRows.add(getRow(index));
+		}
+		return stringRows;
 	}
 	
-	public dbType [] getRow(int index) {
-		return rows.get(index);
+	public String [] getRow(int index) {
+		String [] stringRow = new String[rows.get(index).length];
+		for(int i = 0;i < stringRow.length;++i) {
+			stringRow[i] = rows.get(index)[i].toString();
+		}
+		return stringRow;
 	}
 	
 	public Iterable<Integer> rows(Map<String, String> pattern) {

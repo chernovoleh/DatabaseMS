@@ -2,42 +2,13 @@ package DatabaseMSCore;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Database implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<Table> tables;
-	private String name;
-	
-	private class TableNamesIterator implements Iterator<String> {
-		private int index = 0;
-		@Override
-		public boolean hasNext() {			
-			return index < tables.size();
-		}
-
-		@Override
-		public String next() {			
-			return tables.get(index++).name();
-		}
-
-		@Override
-		public void remove() {
-			// TODO Auto-generated method stub			
-		}
-		
-	}
-	
-	private class TableNames implements Iterable<String> {
-
-		@Override
-		public Iterator<String> iterator() {			
-			return new TableNamesIterator();
-		}
-		
-	}
+	private String name;	
 	
 	public Database(String name) {
 		this.name = name;
@@ -83,7 +54,10 @@ public class Database implements Serializable{
 	}
 	
 	public Iterable<String> tableNames() {
-		return new TableNames();
+		ArrayList<String> tableNames = new ArrayList<String>();
+		for(Table t : tables)
+			tableNames.add(t.name());
+		return tableNames;
 	}
 	
 	public Boolean addTable(String tableName, Map<String, String> tableScheme) {

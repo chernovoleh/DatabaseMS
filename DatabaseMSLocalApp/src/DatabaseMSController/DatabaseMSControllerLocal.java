@@ -116,7 +116,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 	@Override
 	public Boolean OnTableRemoved(String tableName) {
 		dbManager.removeActiveTable();
-		OnSetActiveDatabase(dbManager.activeDatabase().name());
+		OnSetActiveDatabase(dbManager.getActiveDbName());
 		fillTable();
 		
 		return true;

@@ -12,11 +12,8 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import DatabaseMSCore.ColumnScheme;
 import DatabaseMSCore.Database;
 import DatabaseMSCore.Table;
-import DatabaseMSCore.TableScheme;
-import DatabaseMSCore.dbType;
 import DatabaseMSCore.dbTypeDouble;
 import DatabaseMSCore.dbTypeInteger;
 import DatabaseMSCore.dbTypeString;
@@ -71,7 +68,7 @@ public class UnitTestDatabaseSerialization {
 		assertTrue(db2.tableCount() == 2);
 		for(String tableName : db2.tableNames()) {
 			Table table = db2.table(tableName);
-			for(dbType [] row : table.rows()) {
+			for(String [] row : table.rows()) {
 				assertTrue(row[0].toString().equals("QQQ"));
 				assertTrue(row[1].toString().equals("22"));
 				assertTrue(row[2].toString().equals("44.0"));
