@@ -8,8 +8,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.swing.plaf.metal.MetalIconFactory.FolderIcon16;
+import java.util.Map;
 
 public class DatabaseManager {
 	final static Class<?> [] allowedTypes = {Integer.class, Double.class, Character.class, String.class};
@@ -135,5 +134,65 @@ public class DatabaseManager {
 		
 		databases.add(new Database(dbName));
 		return true;
+	}
+	
+	public Iterable<String> getActiveDBTableNames() {
+		return activeDatabase().tableNames();
+	}
+	
+	public int getActiveTableRowsCount() {
+		return activeTable().rowsCount();
+	}
+	
+	public int getActiveTableColumnsCount() {
+		return activeTable().columnsCount();
+	}
+	
+	public Iterable<dbType[]> getActiveTableRows() {
+		return activeTable().rows();
+	}
+	
+	public Iterable<Integer> getActiveTableRows(Map<String, String> pattern) {
+		return activeTable().rows(pattern);
+	}
+	
+	public Iterable<String> getActiveTableColumnNames() {
+		return activeTable().columnNames();
+	}
+	
+	public Boolean isActiveTableSet() {
+		return activeTable() != null;
+	}
+	
+	public dbType [] getActiveTableRow(int index) {
+		return activeTable().getRow(index);
+	}
+	
+	public Boolean setActiveTableValueAt(int rowIndex, int columnIndex, String newValue) {
+		return activeTable().setValue(rowIndex, columnIndex, newValue);
+	}
+	
+	public Boolean addRowToActiveTable(Map<String, String> values) {
+		return activeTable().addRow(values);
+	}
+	
+	public void removeRowFromActiveTable(int rowIndex) {
+		activeTable().removeRow(rowIndex);
+	}
+	
+	public Boolean changeColumnNameInActiveTable(String oldName, String newName) {
+		return activeTable().changeColumnName(oldName, newName);
+	}
+	
+	public String getActiveDbName() {
+		return activeDatabase().name();
+	}
+	
+	public Boolean addTableToActiveDb(String tableName, Map<String, String> tableScheme) {
+		return activeDB.addTable(tableName, tableScheme);
+	}
+	
+	public Boolean checkTypeInActiveTableAt(String columnName, String value) {
+		return activeTable().checkType(columnName, value);
 	}
 }

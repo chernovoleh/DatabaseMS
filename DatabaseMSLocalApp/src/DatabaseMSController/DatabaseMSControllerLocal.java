@@ -8,15 +8,6 @@ import java.util.Map;
 import DatabaseMS.DatabaseMSController;
 import DatabaseMSCore.ColumnScheme;
 import DatabaseMSCore.DatabaseManager;
-import DatabaseMSCore.Table;
-import DatabaseMSCore.TableScheme;
-import DatabaseMSCore.dbType;
-import DatabaseMSCore.dbTypeCharacter;
-import DatabaseMSCore.dbTypeDate;
-import DatabaseMSCore.dbTypeDateInterval;
-import DatabaseMSCore.dbTypeDouble;
-import DatabaseMSCore.dbTypeInteger;
-import DatabaseMSCore.dbTypeString;
 import DatabaseMS.DatabaseMSView;
 
 public class DatabaseMSControllerLocal implements DatabaseMSController {
@@ -43,26 +34,24 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		if(!dbManager.setActiveDB(dbName))
 			return false;
 		
-		msView.addTablesToDatabase(dbManager.activeDatabase().tableNames(), dbName);
+		msView.addTablesToDatabase(dbManager.getActiveDBTableNames(), dbName);
 		fillTable();
 		return true;
 	}
 	
 	private void fillTable() {
-		if(dbManager.activeTable() == null)
-		{
+		if(!dbManager.isActiveTableSet()) {
 			msView.fillTable(null, null);
 		}
-		else
-		{
-			Object[][] rows = new Object[dbManager.activeTable().rowsCount()][];
+		else {
+			Object[][] rows = new Object[dbManager.getActiveTableRowsCount()][];
 			int i = 0;
-			for(Object[] row : dbManager.activeTable().rows())
+			for(Object[] row : dbManager.getActiveTableRows())
 				rows[i++] = row;
 			
-			Object [] columnNames = new Object[dbManager.activeTable().columnsCount()];
+			Object [] columnNames = new Object[dbManager.getActiveTableColumnsCount()];
 			int j = 0;
-			for(String columnName : dbManager.activeTable().columnNames())
+			for(String columnName : dbManager.getActiveTableColumnNames())
 				columnNames[j++] = columnName;
 			
 			msView.fillTable(rows, columnNames);
@@ -74,12 +63,12 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 		
 		int i = 0;
 		for(Integer index : indexes) {
-			rows[i++] = dbManager.activeTable().getRow(index);
+			rows[i++] = dbManager.getActiveTableRow(index);
 		}
 		
-		Object [] columnNames = new Object[dbManager.activeTable().columnsCount()];
+		Object [] columnNames = new Object[dbManager.getActiveTableColumnsCount()];
 		int j = 0;
-		for(String columnName : dbManager.activeTable().columnNames())
+		for(String columnName : dbManager.getActiveTableColumnNames())
 			columnNames[j++] = columnName;
 		
 		msView.fillTable(rows, columnNames);
@@ -104,25 +93,22 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public Boolean OnUpdateValue(int rowIndex, int columnIndex, Object newValue) {
-		if(!dbManager.activeTable().setValue(rowIndex, columnIndex, newValue.toString()))
+		if(!dbManager.setActiveTableValueAt(rowIndex, columnIndex, newValue.toString()))
 			return false;
 		return null;
 	}
 
 	@Override
 	public Boolean OnRowInserted(int rowIndex) {
-		Table table = dbManager.activeTable();
 		Map<String, String> vals = new HashMap<String, String>();
-		table.addRow(vals);
+		dbManager.addRowToActiveTable(vals);
 		fillTable();
 		return true;
 	}
 
 	@Override
 	public Boolean OnRowRemoved(int rowIndex) {
-		Table table = dbManager.activeTable();
-		
-		table.removeRow(rowIndex);
+		dbManager.removeRowFromActiveTable(rowIndex);
 		fillTable();
 		return null;		
 	}
@@ -138,9 +124,9 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public Boolean OnColumnNameChanged(String oldName, String newName) {
-		if(dbManager.activeTable() == null)
+		if(!dbManager.isActiveTableSet())
 			return false;
-		if(!dbManager.activeTable().changeColumnName(oldName, newName))
+		if(!dbManager.changeColumnNameInActiveTable(oldName, newName))
 			return false;
 		
 		fillTable();
@@ -149,8 +135,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public Boolean IsValueValid(String columnName, String value) {
-		Table activeTable = dbManager.activeTable();
-		return activeTable.checkType(columnName, value);
+		return dbManager.checkTypeInActiveTableAt(columnName, value);
 	}
 
 	@Override
@@ -159,7 +144,7 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 			return true;
 		
 		ArrayList<Integer> foundRows = new ArrayList<Integer>();
-		for(Integer i : dbManager.activeTable().rows(pattern))
+		for(Integer i : dbManager.getActiveTableRows(pattern))
 			foundRows.add(i);
 		
 		fillTable(foundRows);
@@ -173,10 +158,10 @@ public class DatabaseMSControllerLocal implements DatabaseMSController {
 
 	@Override
 	public Boolean OnTableAdded(String tableName, Map<String, String> tableScheme) {
-		if(!dbManager.activeDatabase().addTable(tableName, tableScheme))
+		if(!dbManager.addTableToActiveDb(tableName, tableScheme))
 			return false;
 		
-		OnSetActiveDatabase(dbManager.activeDatabase().name());
+		OnSetActiveDatabase(dbManager.getActiveDbName());
 		OnSetActiveTable(tableName);		
 		return true;
 	}
