@@ -8,6 +8,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.rmi.PortableRemoteObject;
+
 import DatabaseMS.DatabaseMSController;
 import DatabaseMS.DatabaseMSModelRMI;
 import DatabaseMS.DatabaseMSView;
@@ -18,15 +22,27 @@ public class DatabaseMSIIOPController implements DatabaseMSController {
 	private DatabaseMSView msView;
 	
 	public DatabaseMSIIOPController(DatabaseMSView msView) {
-		this.dbManager = null;
-		try {
-            Registry registry = LocateRegistry.getRegistry();
-            dbManager = (DatabaseMSModelRMI) registry.lookup("DatabaseMSModelJRMP");            
-        } catch (Exception e) {
-            System.err.println("Client exception: " + e.toString());
-            e.printStackTrace();
-        }
 		this.msView = msView;
+		
+		try {
+            Context ic = new InitialContext();
+         
+        // STEP 1: Get the Object reference from the Name Service
+        // using JNDI call.
+            Object objref = ic.lookup("DatabaseMSModelIIOPImpl");
+            System.out.println("Client: Obtained a ref. to DatabaseMS model.");
+
+        // STEP 2: Narrow the object reference to the concrete type and
+        // invoke the method.
+            this.dbManager = (DatabaseMSModelRMI) PortableRemoteObject.narrow(
+                objref, DatabaseMSModelRMI.class);            
+
+        } catch( Exception e ) {
+            System.err.println( "Exception " + e + "Caught" );
+            e.printStackTrace( );
+            return;
+        }
+		
 	}
 
 	@Override
@@ -276,6 +292,9 @@ public class DatabaseMSIIOPController implements DatabaseMSController {
 	}
 	
 	public static void main(String[] args) {
+		System.getProperties().setProperty("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
+		System.getProperties().setProperty("java.naming.provider.url", "iiop://localhost:1050");
+		
 		DatabaseMSView msMainWindow = new DatabaseMSMainWindow();
 		DatabaseMSIIOPController msControllerLocal = new DatabaseMSIIOPController(msMainWindow);
 		

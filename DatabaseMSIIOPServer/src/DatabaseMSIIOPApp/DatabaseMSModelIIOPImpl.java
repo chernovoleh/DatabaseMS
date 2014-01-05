@@ -8,20 +8,22 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 
 
 import java.util.Map;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.rmi.PortableRemoteObject;
+
 import DatabaseMS.DatabaseMSModelRMI;
 import DatabaseMSCore.ColumnScheme;
 import DatabaseMSCore.Database;
 import DatabaseMSCore.Table;
-import DatabaseMSCore.dbType;
 
-public class DatabaseMSModelIIOPImpl implements DatabaseMSModelRMI {
+
+public class DatabaseMSModelIIOPImpl extends PortableRemoteObject  implements DatabaseMSModelRMI {
 	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<Database> databases;
@@ -226,26 +228,31 @@ public class DatabaseMSModelIIOPImpl implements DatabaseMSModelRMI {
 		return activeTable().checkType(columnName, value);
 	}
 	
-	public static void main(String [] args) throws UnknownHostException {
-		//System.setProperty("java.rmi.server.hostname", "127.0.0.1");
-		try {
-			DatabaseMSModelIIOPImpl model = new DatabaseMSModelIIOPImpl();
-			DatabaseMSModelRMI stub = (DatabaseMSModelRMI) UnicastRemoteObject.exportObject(model, 0);
-
-            // Bind the remote object's stub in the registry
-			Registry registry = LocateRegistry.createRegistry(1099);			
-			
-            registry.rebind("DatabaseMSModelJRMP", stub);            
-
-            System.err.println("Server ready");
-        } catch (Exception e) {
-            System.err.println("Server exception: " + e.toString());
-            e.printStackTrace();
-        }
-	}
-
 	@Override
 	public String[] getColumnTypes() {
 		return ColumnScheme.getTypeNames();
 	}
+	
+	public static void main(String [] args) throws UnknownHostException {
+		System.getProperties().setProperty("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
+		System.getProperties().setProperty("java.naming.provider.url", "iiop://localhost:1050");
+
+		try {
+            // Step 1: Instantiate the Hello servant
+			DatabaseMSModelIIOPImpl model = new DatabaseMSModelIIOPImpl();
+
+            // Step 2: Publish the reference in the Naming Service 
+            // using JNDI API
+            Context initialNamingContext = new InitialContext();
+            
+            initialNamingContext.rebind("DatabaseMSModelIIOPImpl", model );
+
+            System.out.println("DatabaseMS Server: Ready...");
+
+         } catch (Exception e) {            
+            e.printStackTrace();
+         } 
+	}
+
+	
 }
