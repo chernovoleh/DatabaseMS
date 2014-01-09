@@ -14,49 +14,44 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 	private IDatabaseMSWebService dbService;
 	private DatabaseMSView msView;
 	
-	private DatabaseManager dbManager() {
-		return dbService.getDBManager();
-	}
-	
 	public DatabaseMSWebServiceController(DatabaseMSView msView, IDatabaseMSWebService dbService) {
 		this.dbService = dbService;
 		this.msView = msView;
 	}
 
 	@Override
-	public Boolean OnWorkspaceChosen(File folder) {
-		DatabaseManager dbManager = new DatabaseManager();		
-		if(!dbManager.loadWorkspace(folder))
+	public Boolean OnWorkspaceChosen(File folder) {				
+		if(!dbService.loadWorkspace(folder))
 			return false;
 		
-		msView.addDatabases(dbManager().databaseNames());	
+		msView.addDatabases(dbService.databaseNames());	
 		fillTable();
-		return true;
+		return true;		
 	}
 
 	@Override
 	public Boolean OnSetActiveDatabase(String dbName) {
-		if(!dbManager().setActiveDB(dbName))
+		if(!dbService.setActiveDB(dbName))
 			return false;
 		
-		msView.addTablesToDatabase(dbManager().getActiveDBTableNames(), dbName);
+		msView.addTablesToDatabase(dbService.getActiveDBTableNames(), dbName);
 		fillTable();
 		return true;
 	}
 	
 	private void fillTable() {
-		if(!dbManager().isActiveTableSet()) {
+		if(!dbService.isActiveTableSet()) {
 			msView.fillTable(null, null);
 		}
 		else {
-			Object[][] rows = new Object[dbManager().getActiveTableRowsCount()][];
+			Object[][] rows = new Object[dbService.getActiveTableRowsCount()][];
 			int i = 0;
-			for(Object[] row : dbManager().getActiveTableRows())
+			for(Object[] row : dbService.getActiveTableRows())
 				rows[i++] = row;
 			
-			Object [] columnNames = new Object[dbManager().getActiveTableColumnsCount()];
+			Object [] columnNames = new Object[dbService.getActiveTableColumnsCount()];
 			int j = 0;
-			for(String columnName : dbManager().getActiveTableColumnNames())
+			for(String columnName : dbService.getActiveTableColumnNames())
 				columnNames[j++] = columnName;
 			
 			msView.fillTable(rows, columnNames);
@@ -68,12 +63,12 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 		
 		int i = 0;
 		for(Integer index : indexes) {
-			rows[i++] = dbManager().getActiveTableRow(index);
+			rows[i++] = dbService.getActiveTableRow(index);
 		}
 		
-		Object [] columnNames = new Object[dbManager().getActiveTableColumnsCount()];
+		Object [] columnNames = new Object[dbService.getActiveTableColumnsCount()];
 		int j = 0;
-		for(String columnName : dbManager().getActiveTableColumnNames())
+		for(String columnName : dbService.getActiveTableColumnNames())
 			columnNames[j++] = columnName;
 		
 		msView.fillTable(rows, columnNames);
@@ -81,7 +76,7 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 
 	@Override
 	public Boolean OnSetActiveTable(String tableName) {
-		if(!dbManager().setActiveTable(tableName))
+		if(!dbService.setActiveTable(tableName))
 			return false;
 		
 		fillTable();
@@ -89,8 +84,8 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 	}
 
 	@Override
-	public Boolean OnSaveWorkspace() {
-		if(!dbManager().saveWorkspace())
+	public Boolean OnSaveWorkspace() {		
+		if(!dbService.saveWorkspace())
 			return false;
 		
 		return true;
@@ -98,7 +93,7 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 
 	@Override
 	public Boolean OnUpdateValue(int rowIndex, int columnIndex, Object newValue) {
-		if(!dbManager().setActiveTableValueAt(rowIndex, columnIndex, newValue.toString()))
+		if(!dbService.setActiveTableValueAt(rowIndex, columnIndex, newValue.toString()))
 			return false;
 		return null;
 	}
@@ -106,22 +101,22 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 	@Override
 	public Boolean OnRowInserted(int rowIndex) {
 		Map<String, String> vals = new HashMap<String, String>();
-		dbManager().addRowToActiveTable(vals);
+		dbService.addRowToActiveTable(vals);
 		fillTable();
 		return true;
 	}
 
 	@Override
 	public Boolean OnRowRemoved(int rowIndex) {
-		dbManager().removeRowFromActiveTable(rowIndex);
+		dbService.removeRowFromActiveTable(rowIndex);
 		fillTable();
 		return null;		
 	}
 
 	@Override
 	public Boolean OnTableRemoved(String tableName) {
-		dbManager().removeActiveTable();
-		OnSetActiveDatabase(dbManager().getActiveDbName());
+		dbService.removeActiveTable();
+		OnSetActiveDatabase(dbService.getActiveDbName());
 		fillTable();
 		
 		return true;
@@ -129,9 +124,9 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 
 	@Override
 	public Boolean OnColumnNameChanged(String oldName, String newName) {
-		if(!dbManager().isActiveTableSet())
+		if(!dbService.isActiveTableSet())
 			return false;
-		if(!dbManager().changeColumnNameInActiveTable(oldName, newName))
+		if(!dbService.changeColumnNameInActiveTable(oldName, newName))
 			return false;
 		
 		fillTable();
@@ -140,7 +135,7 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 
 	@Override
 	public Boolean IsValueValid(String columnName, String value) {
-		return dbManager().checkTypeInActiveTableAt(columnName, value);
+		return dbService.checkTypeInActiveTableAt(columnName, value);
 	}
 
 	@Override
@@ -149,7 +144,7 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 			return true;
 		
 		ArrayList<Integer> foundRows = new ArrayList<Integer>();
-		for(Integer i : dbManager().getActiveTableRows(pattern))
+		for(Integer i : dbService.getActiveTableRowsByPattern(pattern))
 			foundRows.add(i);
 		
 		fillTable(foundRows);
@@ -163,23 +158,23 @@ public class DatabaseMSWebServiceController implements DatabaseMSController {
 
 	@Override
 	public Boolean OnTableAdded(String tableName, Map<String, String> tableScheme) {
-		if(!dbManager().addTableToActiveDb(tableName, tableScheme))
+		if(!dbService.addTableToActiveDb(tableName, tableScheme))
 			return false;
 		
-		OnSetActiveDatabase(dbManager().getActiveDbName());
+		OnSetActiveDatabase(dbService.getActiveDbName());
 		OnSetActiveTable(tableName);		
 		return true;
 	}
 
 	@Override
 	public Boolean OnDatabaseCreated(String dbName) {
-		if(!dbManager().isWorkspaceLoaded())
+		if(!dbService.isWorkspaceLoaded())
 			return false;
 		
-		if(!dbManager().addDatabase(dbName))
+		if(!dbService.addDatabase(dbName))
 			return false;
 		
-		msView.addDatabases(dbManager().databaseNames());
+		msView.addDatabases(dbService.databaseNames());
 		return true;
 	}
 }

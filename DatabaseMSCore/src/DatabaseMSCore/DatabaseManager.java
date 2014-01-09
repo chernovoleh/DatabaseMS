@@ -107,7 +107,7 @@ public class DatabaseManager {
 		return Arrays.asList(allowedTypes);
 	}
 	
-	public Iterable<String> databaseNames() {
+	public ArrayList<String> databaseNames() {
 		ArrayList<String> dbNames = new ArrayList<String>();
 		for(Database db : databases) {
 			dbNames.add(db.name());
@@ -136,7 +136,7 @@ public class DatabaseManager {
 		return true;
 	}
 	
-	public Iterable<String> getActiveDBTableNames() {
+	public ArrayList<String> getActiveDBTableNames() {
 		return activeDatabase().tableNames();
 	}
 	
@@ -148,15 +148,15 @@ public class DatabaseManager {
 		return activeTable().columnsCount();
 	}
 	
-	public Iterable<String[]> getActiveTableRows() {
+	public ArrayList<String[]> getActiveTableRows() {
 		return activeTable().rows();
 	}
 	
-	public Iterable<Integer> getActiveTableRows(Map<String, String> pattern) {
+	public ArrayList<Integer> getActiveTableRows(Map<String, String> pattern) {
 		return activeTable().rows(pattern);
 	}
 	
-	public Iterable<String> getActiveTableColumnNames() {
+	public ArrayList<String> getActiveTableColumnNames() {
 		return activeTable().columnNames();
 	}
 	

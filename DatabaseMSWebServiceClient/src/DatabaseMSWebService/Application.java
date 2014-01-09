@@ -26,14 +26,7 @@ public class Application {
         
         Service service = Service.create(url, name);
         
-        IDatabaseMSWebService dbService = service.getPort(IDatabaseMSWebService.class);
-        
-        dbService.addDatabase("Db1");
-        dbService.addDatabase("Db2");
-        
-        ArrayList<String> dbNames = dbService.getDBNames();
-        
-        
+        IDatabaseMSWebService dbService = service.getPort(IDatabaseMSWebService.class);        
         DatabaseMSView dbView = new DatabaseMSMainWindow();
         
         DatabaseMSWebServiceController dbController = new DatabaseMSWebServiceController(dbView, dbService); 

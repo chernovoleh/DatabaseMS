@@ -53,7 +53,7 @@ public class Database implements Serializable{
 		return false;
 	}
 	
-	public Iterable<String> tableNames() {
+	public ArrayList<String> tableNames() {
 		ArrayList<String> tableNames = new ArrayList<String>();
 		for(Table t : tables)
 			tableNames.add(t.name());

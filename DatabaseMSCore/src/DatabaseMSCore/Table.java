@@ -79,7 +79,7 @@ public class Table implements Serializable{
 		return tableScheme.changeColumnName(oldName, newName);
 	}
 	
-	public Iterable<String[]> rows() {
+	public ArrayList<String[]> rows() {
 		ArrayList<String[]> stringRows = new ArrayList<String[]>();
 		for(int index = 0;index < rows.size();++index) {
 			stringRows.add(getRow(index));
@@ -95,7 +95,7 @@ public class Table implements Serializable{
 		return stringRow;
 	}
 	
-	public Iterable<Integer> rows(Map<String, String> pattern) {
+	public ArrayList<Integer> rows(Map<String, String> pattern) {
 		ArrayList<Integer> chosenRows = new ArrayList<Integer>();
 		for(int i = 0;i < rows.size();++i) {
 			Boolean flag = true;
@@ -111,7 +111,7 @@ public class Table implements Serializable{
 		return chosenRows;
 	}	
 	
-	public Iterable<String> columnNames() {
+	public ArrayList<String> columnNames() {
 		ArrayList<String> columnNames = new ArrayList<String>();
 		for(int i = 0;i < tableScheme.columnsCount();++i)
 			columnNames.add(tableScheme.columnName(i));
